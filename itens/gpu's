@@ -1,0 +1,29 @@
+{
+  "nome": "RTX 4060",
+  "vram": 8,
+  "preco": 1899.90,
+  "consumo": 115,
+  "fps_valorant": 300,
+  "fps_gta": 120,
+  "fps_cyberpunk": 70
+}
+
+{
+  "nome": "RTX 4070 Super",
+  "vram": 12,
+  "preco": 4399.90,
+  "consumo": 220,
+  "fps_valorant": 450,
+  "fps_gta": 170,
+  "fps_cyberpunk": 120
+}
+
+{
+  "nome": "RX 7600",
+  "vram": 8,
+  "preco": 1799.90,
+  "consumo": 165,
+  "fps_valorant": 320,
+  "fps_gta": 130,
+  "fps_cyberpunk": 75
+}

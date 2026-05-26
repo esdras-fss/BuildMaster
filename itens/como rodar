@@ -1,0 +1,10 @@
+// abrir back
+
+cd backend
+.\.venv\Scripts\activate
+python -m uvicorn main:app --reload
+
+// abrir front
+
+cd frontend
+npm run dev	

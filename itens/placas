@@ -1,0 +1,20 @@
+{
+  "nome": "B550 Aorus Elite",
+  "socket": "AM4",
+  "chipset": "B550",
+  "preco": 899.90
+}
+
+{
+  "nome": "X670 Gaming X",
+  "socket": "AM5",
+  "chipset": "X670",
+  "preco": 1899.90
+}
+
+{
+  "nome": "B760M DS3H",
+  "socket": "LGA1700",
+  "chipset": "B760",
+  "preco": 999.90
+}

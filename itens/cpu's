@@ -1,0 +1,21 @@
+{
+  "nome": "Ryzen 5 5600",
+  "socket": "AM4",
+  "preco": 899.90,
+  "consumo": 65
+}
+
+{
+  "nome": "Ryzen 7 7800X3D",
+  "socket": "AM5",
+  "preco": 2799.90,
+  "consumo": 120
+}
+
+{
+  "nome": "Intel i5 13400F",
+  "socket": "LGA1700",
+  "preco": 1399.90,
+  "consumo": 148
+}
+
