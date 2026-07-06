@@ -1,17 +1,24 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import api from '../services/api'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+function logout() {
+  localStorage.removeItem('usuario')
+  router.push('/')
+}
 
 const cpus = ref([])
 const gpus = ref([])
 const motherboards = ref([])
-
 const cpuSelecionada = ref(null)
 const gpuSelecionada = ref(null)
-
 const placasCompativeis = ref([])
 const placaSelecionada = ref(null)
-
+const nomeBuild = ref('')
+const usuario = JSON.parse(localStorage.getItem('usuario'))
 const consumoTotal = computed(() => {
   if (!cpuSelecionada.value || !gpuSelecionada.value) {
     return 0
@@ -46,22 +53,6 @@ const fonteRecomendada = computed(() => {
   }
 
   return 750
-})
-
-const categoriaSetup = computed(() => {
-  if (precoTotal.value === 0) {
-    return ''
-  }
-
-  if (precoTotal.value <= 3000) {
-    return 'Setup de Entrada'
-  }
-
-  if (precoTotal.value <= 6000) {
-    return 'Setup Intermediário'
-  }
-
-  return 'Setup High-end'
 })
 
 const compatibilidade = computed(() => {
@@ -120,8 +111,16 @@ const fonteIdeal = computed(() => {
   return '750W 80 Plus Gold'
 })
 
+ // sair do perfil
+ 
+function sair() {
+  localStorage.removeItem('usuario')
+  router.push('/')
+}
+
 async function salvarBuild() {
   if (
+    
     !cpuSelecionada.value ||
     !gpuSelecionada.value ||
     !placaSelecionada.value
@@ -130,6 +129,7 @@ async function salvarBuild() {
   }
 
   const novaBuild = {
+    nome: nomeBuild.value,
     cpu: cpuSelecionada.value.nome,
     gpu: gpuSelecionada.value.nome,
     motherboard: placaSelecionada.value.nome,
@@ -193,17 +193,24 @@ watch(cpuSelecionada, () => {
 <template>
   <div class="container">
     <header class="hero">
+
   <div>
-    <p class="badge">PC Builder Inteligente</p>
     <h1>BuildMaster</h1>
+
     <p class="subtitle">
-      Monte seu PC gamer com compatibilidade automática, FPS estimado e análise de gargalo.
+      Monte seu computador ideal com análise de compatibilidade,
+      consumo, desempenho e custo.
+    </p>
+
+    <p class="usuario-logado">
+      Bem-vindo, <strong>{{ usuario.nome }}</strong>
     </p>
   </div>
 
-  <button class="btn-limpar" @click="limparSelecao">
-    Limpar seleção
-  </button>
+   <button class="btn-logout" @click="logout">
+  Sair
+</button>
+
 </header>
 
 <div class="builder-grid">
@@ -270,110 +277,172 @@ watch(cpuSelecionada, () => {
       "
       class="resultado"
     >
-      <h2>Seu Setup</h2>
+      <h2> Resumo da configuração </h2>
 
       <div class="setup-grid">
         <div class="setup-card">
-          <strong>CPU</strong>
-          <span>{{ cpuSelecionada.nome }}</span>
-        </div>
+    <span class="titulo-info">CPU:</span>
+    <span>{{ cpuSelecionada.nome }}</span>
+</div>
 
         <div class="setup-card">
-          <strong>GPU</strong>
-          <span>{{ gpuSelecionada.nome }}</span>
-        </div>
+    <span class="titulo-info">GPU:</span>
+    <span>{{ gpuSelecionada.nome }}</span>
+</div>
 
-        <div class="setup-card">
-          <strong>Placa-Mãe</strong>
-          <span>{{ placaSelecionada.nome }}</span>
-        </div>
+<div class="setup-card">
+    <span class="titulo-info">Placa-Mãe:</span>
+    <span>{{ placaSelecionada.nome }}</span>
+</div>
       </div>
 
       <hr>
-
-      <h3>FPS Estimado</h3>
-
-      <p>
-        Valorant:
-        {{ gpuSelecionada.fps_valorant }} FPS
-      </p>
-
-      <p>
-        GTA V:
-        {{ gpuSelecionada.fps_gta }} FPS
-      </p>
-
-      <p>
-        Cyberpunk:
-        {{ gpuSelecionada.fps_cyberpunk }} FPS
-      </p>
-
-      <hr>
-
-     <div class="stats-grid">
-
-  <div class="stat-card purple">
-    <span>💰 Preço Total</span>
-    <strong>R$ {{ precoTotal.toFixed(2) }}</strong>
-  </div>
-
-  <div class="stat-card blue">
-    <span>⚡ Consumo</span>
-    <strong>{{ consumoTotal }}W</strong>
-  </div>
-
-  <div class="stat-card green">
-    <span>🔋 Fonte Ideal</span>
-    <strong>{{ fonteIdeal }}</strong>
-  </div>
-
-  <div class="stat-card yellow">
-    <span>🏆 Categoria</span>
-    <strong>{{ categoriaSetup }}</strong>
-  </div>
-
-</div>
 
 <div class="compatibilidade-box">
   {{ compatibilidade }}
 </div>
 
-      <h3>Análise de Gargalo</h3>
+<h3>🧩 Análise de Gargalo</h3>
 
-      <p>
-        {{ gargalo }}
-      </p>
+<p>
+  {{ gargalo }}
+</p>
 
-      <button class="btn-salvar" @click="salvarBuild">
-        Salvar Build
-      </button>
-    </div>
+<hr>
 
-   <div class="builds-salvas">
-  <h2>Builds Salvas</h2>
+<div class="stats-grid">
 
-  <div
-    v-for="build in buildsSalvas"
-    :key="build.id"
-    class="build-card"
+  <div class="stat-card">
+    <span>💰 Preço Total</span>
+    <strong>R$ {{ precoTotal.toLocaleString('pt-BR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+}) }}</strong>
+  </div>
+
+  <div class="stat-card">
+    <span>⚡ Consumo</span>
+    <strong>{{ consumoTotal }}W</strong>
+  </div>
+
+  <div class="stat-card">
+    <span>🔋 Fonte Recomendada</span>
+    <strong>{{ fonteRecomendada }}W</strong>
+  </div>
+
+</div>
+
+<hr>
+
+<h3>🎮 FPS Estimado</h3>
+
+<div class="fps-grid">
+
+  <div class="fps-card">
+    <span>Valorant</span>
+    <strong>{{ gpuSelecionada.fps_valorant }} FPS</strong>
+  </div>
+
+  <div class="fps-card">
+    <span>GTA V</span>
+    <strong>{{ gpuSelecionada.fps_gta }} FPS</strong>
+  </div>
+
+  <div class="fps-card">
+    <span>Cyberpunk 2077</span>
+    <strong>{{ gpuSelecionada.fps_cyberpunk }} FPS</strong>
+  </div>
+
+</div>
+
+<hr>
+
+<div class="salvar-build">
+
+  <h3>Nome da Build</h3>
+
+  <input
+    class="input-build"
+    v-model="nomeBuild"
+    type="text"
+    placeholder="Ex.: PC Gamer RTX 4060"
+  />
+
+  <button
+    class="btn-salvar"
+    @click="salvarBuild"
   >
-     <h3>{{ build.cpu }}</h3>
+    💾 Salvar Build
+  </button>
 
-     <p>{{ build.gpu }}</p>
+  <button
+    class="btn-limpar"
+    @click="limparSelecao"
+  >
+    🗑 Limpar Configuração
+  </button>
 
-     <p>{{ build.motherboard }}</p>
-
-     <p>💰 R$ {{ build.preco_total.toFixed(2) }}</p>
- 
-     <p>⚡ {{ build.consumo_total }}W</p>
-
-     <button
-       class="btn-deletar"
-       @click="deletarBuild(build.id)"
-     >
-       Excluir Build
-       </button>
+</div>
     </div>
+
+ <div class="builds-salvas">
+<h2>
+  Builds Salvas ({{ buildsSalvas.length }})
+</h2>
+
+  <div class="builds-grid">
+    <div
+      v-for="build in buildsSalvas"
+      :key="build.id"
+      class="build-card"
+    >
+      <div class="build-header">
+
+  <h3>{{ build.nome }}</h3>
+
+  <span>#{{ build.id }}</span>
+
+</div>
+
+<div class="build-componentes">
+
+  <p><strong>🖥 Processador</strong><br>{{ build.cpu }}</p>
+
+  <p><strong>🎮 Placa de Vídeo</strong><br>{{ build.gpu }}</p>
+
+  <p><strong>🧩 Placa-Mãe</strong><br>{{ build.motherboard }}</p>
+
+</div>
+
+<div class="build-info">
+
+  <div>
+    <small>Preço</small>
+    <strong>
+  R$ {{
+    build.preco_total.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })
+  }}
+</strong>
+  </div>
+
+  <div>
+    <small>Consumo</small>
+    <strong>{{ build.consumo_total }}W</strong>
+  </div>
+
+</div>
+
+<button
+class="btn-deletar"
+@click="deletarBuild(build.id)"
+>
+🗑 Excluir Build
+</button>
+      </div>
+     </div>
     </div>
   </div>
 </template>
@@ -381,95 +450,72 @@ watch(cpuSelecionada, () => {
 <style>
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #1e1b4b, #020617 60%);
-  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  font-family: 'Poppins', sans-serif;
+  color: #111827;
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: auto;
   padding: 40px;
-  color: white;
+  color: #111827;
 }
 
 h1 {
   font-size: 48px;
-  margin-bottom: 40px;
-  color: #a855f7;
-  text-shadow: 0 0 20px #7c3aed;
+  margin-bottom: 15px;
+  color: #111827;
+  text-shadow: none;
 }
 
 .card {
-  background: rgba(30, 41, 59, 0.75);
+  background: white;
   padding: 24px;
-  margin-bottom: 25px;
-  border-radius: 22px;
-  border: 1px solid rgba(124, 58, 237, 0.35);
-  backdrop-filter: blur(12px);
-  box-shadow:
-    0 0 25px rgba(124, 58, 237, 0.18),
-    inset 0 0 20px rgba(255, 255, 255, 0.02);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border 0.25s ease;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 25px rgba(0,0,0,.08);
+  transition: .25s;
 }
 
-.card:hover {
-  transform: translateY(-6px);
-
-  border: 1px solid #a855f7;
-
-  box-shadow:
-    0 0 35px rgba(168, 85, 247, 0.35),
-    0 0 80px rgba(56, 189, 248, 0.12);
+.card:hover{
+  transform: translateY(-4px);
+  box-shadow:0 15px 30px rgba(0,0,0,.12);
 }
 
-.card h2 {
-  color: #38bdf8;
+.card h2{
+    color:#111827;
+    margin-bottom:18px;
 }
 
-select {
-  width: 100%;
-  padding: 14px;
-  border-radius: 14px;
-  margin-top: 15px;
-
-  background: rgba(2, 6, 23, 0.9);
-  color: white;
-
-  border: 1px solid rgba(124, 58, 237, 0.35);
-
-  font-size: 16px;
-
-  transition: 0.25s;
+select{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    background:white;
+    color:#111827;
+    font-size:15px;
+    transition:.2s;
 }
 
-select:hover {
-  border-color: #38bdf8;
+select:focus{
+    outline:none;
+    border-color:#2563eb;
+    box-shadow:0 0 0 4px rgba(37,99,235,.15);
 }
 
-select:focus {
-  outline: none;
-
-  border-color: #a855f7;
-
-  box-shadow:
-    0 0 20px rgba(168, 85, 247, 0.4);
-}
-
-.resultado {
-  background: rgba(17, 24, 39, 0.95);
-  padding: 30px;
-  border-radius: 20px;
-  margin-top: 30px;
-  border: 2px solid #a855f7;
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.45);
+.resultado{
+    background:#fff;
+    padding:35px;
+    border-radius:18px;
+    margin-top:35px;
+    border:1px solid #E5E7EB;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
 }
 
 .resultado h2 {
-  color: #22c55e;
+    color: #111827;
 }
 
 .resultado h3 {
@@ -487,22 +533,21 @@ p {
   font-size: 17px;
 }
 
-.btn-limpar {
-  display: block;
-  margin: 0 auto 30px auto;
-  padding: 12px 24px;
-  background: linear-gradient(90deg, #7c3aed, #38bdf8);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.45);
+.btn-limpar{
+    width:100%;
+    margin-top:15px;
+    padding:15px;
+    background:#EF4444;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.2s;
 }
 
-.btn-limpar:hover {
-  transform: scale(1.05);
-} 
+.btn-limpar:hover{
+    background:#DC2626;
+}
 
 .setup-grid {
   display: grid;
@@ -511,38 +556,38 @@ p {
   margin-bottom: 25px;
 }
 
-.setup-card {
-  background: #020617;
-  border: 1px solid #38bdf8;
-  padding: 18px;
-  border-radius: 14px;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+.setup-card{
+    background:#F9FAFB;
+    border:1px solid #E5E7EB;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:none;
 }
 
-.setup-card strong {
-  display: block;
-  color: #38bdf8;
-  margin-bottom: 8px;
+.setup-card strong{
+    color:#2563EB;
 }
 
-.setup-card span {
-  color: white;
+.setup-card span{
+    color:#111827;
 }
 
-.btn-salvar {
-  margin-top: 25px;
-  padding: 14px 28px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(90deg, #22c55e, #38bdf8);
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+.btn-salvar{
+    width:100%;
+    margin-top:20px;
+    padding:15px;
+    background:#2563EB;
+    color:white;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
 }
 
-.builds-salvas {
-  margin-top: 50px;
+.btn-salvar:hover{
+    background:#1D4ED8;
 }
 
 .build-card {
@@ -587,10 +632,10 @@ p {
 }
 
 .subtitle {
-  max-width: 650px;
-  color: #cbd5e1;
+  max-width: 700px;
+  color: #6b7280;
   font-size: 18px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 @media (max-width: 768px) {
@@ -626,31 +671,29 @@ p {
 }
 
 .stat-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
   padding: 22px;
-  border-radius: 18px;
-  color: white;
-  font-weight: bold;
-
   display: flex;
   flex-direction: column;
   gap: 10px;
-
-  backdrop-filter: blur(10px);
-
-  transition: 0.25s;
+  transition: .2s;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-4px);
 }
 
 .stat-card span {
+  color: #64748b;
   font-size: 14px;
-  opacity: 0.9;
 }
 
 .stat-card strong {
-  font-size: 22px;
+  color: #111827;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .purple {
@@ -670,18 +713,253 @@ p {
   color: #111827;
 }
 
-.compatibilidade-box {
-  margin-top: 20px;
-  padding: 18px;
-  border-radius: 14px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid #22c55e;
-  font-size: 17px;
+.compatibilidade-box{
+    background: #dcfce7;
+    border: 2px solid #22c55e;
+    color: #166534;
+    padding: 18px;
+    border-radius: 14px;
+    font-weight: 600;
 }
 
 @media (max-width: 700px) {
   .stats-grid {
     grid-template-columns: 1fr;
   }
+}
+.builds-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.build-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
+}
+
+.build-header span {
+  color: #c084fc;
+  font-size: 14px;
+}
+
+.build-info {
+  display: flex;
+  justify-content: space-between;
+  margin: 18px 0;
+  color: #38bdf8;
+}
+
+@media (max-width: 700px) {
+  .builds-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.build-card h3 {
+  color: #38bdf8;
+  font-size: 30px;
+  margin-bottom: 25px;
+}
+.btn-logout{
+    background:#ef4444;
+    color:white;
+    border:none;
+    padding:12px 22px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
+
+.btn-logout:hover{
+    background:#dc2626;
+}
+
+.usuario-logado{
+    margin-top:15px;
+    color:#6b7280;
+    font-size:15px;
+}
+
+.usuario-logado strong{
+    color:#2563EB;
+}
+
+.fps-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin:25px 0;
+}
+
+.fps-card{
+    background:#ffffff;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 8px 18px rgba(0,0,0,.08);
+    transition:.2s;
+}
+
+.fps-card:hover{
+    transform:translateY(-4px);
+}
+
+.fps-card span{
+    display:block;
+    color:#6b7280;
+    margin-bottom:10px;
+    font-size:14px;
+}
+
+.fps-card strong{
+    font-size:24px;
+    color:#2563EB;
+}
+
+@media(max-width:768px){
+    .fps-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+.build-card{
+
+    background:#fff;
+    border:1px solid #E5E7EB;
+    border-radius:18px;
+    padding:22px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+    transition:.25s;
+}
+
+.build-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.build-componentes{
+
+    margin:20px 0;
+
+}
+
+.build-componentes p{
+
+    margin:15px 0;
+
+    color:#374151;
+
+}
+
+.build-componentes strong{
+
+    color:#2563EB;
+
+}
+
+.build-info{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin:25px 0;
+
+}
+
+.build-info div{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.build-info small{
+
+    color:#9CA3AF;
+
+}
+
+.build-info strong{
+
+    font-size:20px;
+
+}
+.btn-deletar{
+
+    width:100%;
+
+    padding:14px;
+
+    background:#DC2626;
+
+    color:white;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.btn-deletar:hover{
+
+    background:#B91C1C;
+
+}
+.setup-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titulo-info {
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.salvar-build {
+  margin-top: 35px;
+  padding: 30px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+}
+
+.salvar-build h3 {
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+.input-build {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+
+  font-size: 16px;
+
+  transition: .2s;
+}
+
+.input-build:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
 }
 </style>

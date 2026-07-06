@@ -10,7 +10,6 @@ class CPU(Base):
     preco = Column(Float)
     consumo = Column(Integer)
 
-
 class GPU(Base):
     __tablename__ = "gpus"
 
@@ -43,3 +42,12 @@ class Build(Base):
 
     preco_total = Column(Float)
     consumo_total = Column(Integer)
+    nome = Column(String)
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    senha = Column(String, nullable=False)

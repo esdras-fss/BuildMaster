@@ -7,7 +7,6 @@ class CPUBase(BaseModel):
     preco: float
     consumo: int
 
-
 class CPUCreate(CPUBase):
     pass
 
@@ -15,8 +14,8 @@ class CPUCreate(CPUBase):
 class CPU(CPUBase):
     id: int
 
-class Config:
-    from_attributes = True
+    class Config:
+     from_attributes = True
 
 
 class GPUBase(BaseModel):
@@ -28,7 +27,6 @@ class GPUBase(BaseModel):
     fps_gta: int
     fps_cyberpunk: int
 
-
 class GPUCreate(GPUBase):
     pass
 
@@ -36,7 +34,7 @@ class GPUCreate(GPUBase):
 class GPU(GPUBase):
     id: int
 
-class Config:
+    class Config:
         from_attributes = True
 
 class MotherboardBase(BaseModel):
@@ -45,7 +43,6 @@ class MotherboardBase(BaseModel):
     chipset: str
     preco: float
 
-
 class MotherboardCreate(MotherboardBase):
     pass
 
@@ -53,8 +50,8 @@ class MotherboardCreate(MotherboardBase):
 class Motherboard(MotherboardBase):
     id: int
 
-class Config:
-    from_attributes = True    
+    class Config:
+     from_attributes = True    
 
 class BuildBase(BaseModel):
     cpu: str
@@ -65,11 +62,31 @@ class BuildBase(BaseModel):
 
 
 class BuildCreate(BuildBase):
+    nome: str
     pass
 
 
 class Build(BuildBase):
     id: int
 
-class Config:
-    from_attributes = True   
+    class Config:
+     from_attributes = True   
+
+class UserBase(BaseModel):
+    nome: str
+    email: str
+    senha: str
+
+
+class UserCreate(UserBase):
+    pass
+
+class UserLogin(BaseModel):
+    email: str
+    senha: str
+
+class User(UserBase):
+    id: int
+
+    class Config:
+     from_attributes = True
